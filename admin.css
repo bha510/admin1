@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+:root {
+  --primary: #0d47a1;
+  --light: #1976d2;
+  --bg: #f1f5f9;
+  --white: #ffffff;
+  --border: #e0e0e0;
+  --accent: #ffd740;
+  --danger: #dc3545;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg);
+  color: #333;
+  padding-bottom: 80px;
+  line-height: 1.6;
+}
+
+header {
+  background: linear-gradient(to right, var(--primary), var(--light));
+  color: var(--white);
+  padding: 16px 24px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 999;
+}
+
+main {
+  margin-top: 100px;
+  padding: 24px 16px;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.stat-box {
+  background-color: var(--white);
+  border-left: 5px solid var(--light);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  height: 100%;
+}
+
+.stat-box i {
+  font-size: 2.5rem;
+  color: var(--accent);
+}
+
+.stat-box h5 {
+  font-size: 1rem;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.stat-box p {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.stat-box button {
+  margin-top: 8px;
+}
+
+.table {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.table th {
+  background-color: var(--bg);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+  padding: 12px;
+}
+
+.table-striped > tbody > tr:nth-child(odd) {
+  background-color: #fafafa;
+}
+
+.table-bordered {
+  border: 1px solid var(--border);
+}
+
+.btn-outline-primary {
+  font-weight: 500;
+  border-radius: 20px;
+}
+
+.btn-delete {
+  background: transparent;
+  border: none;
+  color: var(--danger);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.btn-delete:hover {
+  color: #a30000;
+}
+
+/* Card Style Fallbacks if needed */
+.card-entry {
+  background: var(--white);
+  padding: 14px;
+  border-left: 5px solid var(--accent);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+.card-entry h4 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: var(--primary);
+}
+
+.card-entry p {
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+
+.scroll-horizontal {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+  }
+  
+  .scroll-horizontal > * {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-width: 280px; /* Adjust card width as needed */
+  }
+  

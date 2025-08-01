@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Panel – RakhiTech</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="admin.css" rel="stylesheet"/>
+</head>
+<body>
+  <header class="bg-warning text-white p-3 text-center shadow-sm">
+    <h1><i class="bi bi-speedometer2"></i> Admin Dashboard</h1>
+  </header>
+
+  <main class="container py-4">
+    <!-- Summary Section -->
+    <section id="summary" class="mb-4">
+      <h2><i class="bi bi-bar-chart-line-fill"></i> Summary</h2>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="p-3 bg-light border rounded shadow-sm">
+            <h5><i class="bi bi-gift-fill text-primary"></i> Total Rakhis Sold</h5>
+            <p class="fs-3 fw-bold" id="totalRakhis">0</p>
+            <button id="incRakhis" class="btn btn-sm btn-outline-success">
+              <i class="bi bi-plus-circle"></i> Add
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-light border rounded shadow-sm">
+            <h5><i class="bi bi-currency-rupee text-success"></i> Total ₹ Collected</h5>
+            <p class="fs-3 fw-bold" id="totalMoney">0</p>
+            <button id="incMoney" class="btn btn-sm btn-outline-success">
+              <i class="bi bi-plus-circle"></i> Add
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-light border rounded shadow-sm">
+            <h5><i class="bi bi-people-fill text-dark"></i> Total Feedbacks</h5>
+            <p class="fs-3 fw-bold" id="totalFeedbacks">0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="feedback" class="mb-4">
+      <h2><i class="bi bi-chat-left-text-fill"></i> Feedbacks</h2>
+      <div id="feedbackList" class="d-flex flex-row flex-nowrap overflow-auto gap-3"></div>
+    </section>
+
+    <!-- Spin Wheel Results -->
+    <section id="spinResultsSection" class="mb-4">
+      <h2><i class="bi bi-arrow-repeat"></i> Spin Wheel Results</h2>
+      <div id="spinResults" class="d-flex flex-row flex-nowrap overflow-auto gap-3"></div>
+    </section>
+
+    <!-- Guess Game Results -->
+    <section id="guessResultsSection" class="mb-4">
+      <h2><i class="bi bi-question-circle"></i> Guess Game Winners</h2>
+      <div id="guessResults" class="d-flex flex-row flex-nowrap overflow-auto gap-3"></div>
+    </section>
+
+    <!-- Ring Toss Results -->
+    <section id="ringResultsSection" class="mb-4">
+      <h2><i class="bi bi-trophy-fill"></i> Ring Toss Game Results</h2>
+      <div id="ringResults" class="d-flex flex-row flex-nowrap overflow-auto gap-3"></div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
+
