@@ -4,7 +4,6 @@ import {
   collection,
   getDocs,
   doc,
-  updateDoc,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -76,7 +75,7 @@ window.deleteFeedback = async function (id, rakhi, amount) {
   }
 };
 
-// ✅ Load Spins
+// ✅ Load Spins (keep only 5 most recent, delete older)
 async function loadSpinResults() {
   const list = document.getElementById("spinResults");
   if (!list) return;
@@ -84,8 +83,31 @@ async function loadSpinResults() {
   list.innerHTML = '';
   const snap = await getDocs(collection(db, "spins"));
 
+  // Collect spin results into an array
+  const spinEntries = [];
   snap.forEach(docSnap => {
-    const d = docSnap.data();
+    const data = docSnap.data();
+    spinEntries.push({ id: docSnap.id, ...data });
+  });
+
+  // Sort by timestamp (if exists), else use document ID as fallback
+  spinEntries.sort((a, b) => {
+    const at = a.timestamp ? a.timestamp.toMillis?.() || a.timestamp : 0;
+    const bt = b.timestamp ? b.timestamp.toMillis?.() || b.timestamp : 0;
+    return bt - at;
+  });
+
+  // Auto delete extra old entries beyond 5
+  if (spinEntries.length > 5) {
+    const extras = spinEntries.slice(5); // Entries to delete
+    for (const entry of extras) {
+      await deleteDoc(doc(db, "spins", entry.id));
+    }
+  }
+
+  // Show only remaining (latest 5) results
+  const visibleSpins = spinEntries.slice(0, 5);
+  visibleSpins.forEach(d => {
     if (!d.name || !d.result) return;
 
     const rakhi = parseInt(d.rakhiCount || 0);
@@ -170,9 +192,3 @@ async function initAdmin() {
 }
 
 initAdmin();
-
-
-
-
-
-
