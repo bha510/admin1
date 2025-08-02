@@ -1,13 +1,17 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore,
   collection,
   getDocs,
   doc,
-  deleteDoc
+  deleteDoc,
+  query,
+  orderBy,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// 🔧 Firebase Config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyC40ARjwUYMA2WPKxkX9DC81Mmn1AmNwhs",
   authDomain: "zyra-3a549.firebaseapp.com",
@@ -25,159 +29,94 @@ let totalAmount = 0;
 
 // ✅ Load Feedbacks
 async function loadFeedbacks() {
-  const list = document.getElementById("feedbackList");
-  const counter = document.getElementById("totalFeedbacks");
-  if (!list || !counter) return;
+  const list = document.getElementById("feedbackResults");
+  if (!list) return;
 
   list.innerHTML = '';
-  const snap = await getDocs(collection(db, "feedback"));
-  let count = 0;
-
+  const snap = await getDocs(collection(db, "feedbacks"));
   snap.forEach(docSnap => {
     const d = docSnap.data();
-    if (!d.name || !d.feedback) return;
-
-    const rakhi = parseInt(d.rakhis || 0);
-    const amount = parseInt(d.amount || 0);
-    totalRakhis += rakhi;
-    totalAmount += amount;
-
     const card = document.createElement("div");
     card.className = "card mb-3 p-3 shadow-sm";
     card.innerHTML = `
-      <h5><i class="bi bi-person-circle"></i> ${d.name}</h5>
+      <h5><i class="bi bi-person-fill"></i> ${d.name}</h5>
       <p><i class="bi bi-chat-dots"></i> ${d.feedback}</p>
-      <p><i class="bi bi-basket"></i> Rakhis: <b>${rakhi}</b> | ₹<b>${amount}</b></p>
-      ${d.selfie ? `<img src="${d.selfie}" class="img-fluid rounded mb-2" style="max-height: 150px;">` : ""}
-      <button class="btn btn-sm btn-danger" onclick="deleteFeedback('${docSnap.id}', ${rakhi}, ${amount})">
-        <i class="bi bi-trash3"></i> Delete
-      </button>
+      <p><i class="bi bi-basket"></i> Rakhis: <b>${d.rakhiCount || 0}</b> | ₹<b>${d.amount || 0}</b></p>
     `;
     list.appendChild(card);
-    count++;
+    totalRakhis += parseInt(d.rakhiCount || 0);
+    totalAmount += parseInt(d.amount || 0);
   });
-
-  counter.innerText = count;
 }
 
-// ✅ DELETE Feedback
-window.deleteFeedback = async function (id, rakhi, amount) {
-  try {
-    const ref = doc(db, "feedback", id);
-    await deleteDoc(ref);
-
-    totalRakhis -= rakhi;
-    totalAmount -= amount;
-
-    await initAdmin(); // Reload everything
-  } catch (e) {
-    alert("Error deleting: " + e.message);
-  }
-};
-
-// ✅ Load Spins (keep only 5 most recent, delete older)
+// ✅ Load Spin Results & DELETE OLD ON PAGE LOAD
 async function loadSpinResults() {
   const list = document.getElementById("spinResults");
   if (!list) return;
 
   list.innerHTML = '';
-  const snap = await getDocs(collection(db, "spins"));
 
-  // Collect spin results into an array
-  const spinEntries = [];
+  const spinsRef = collection(db, "spins");
+  const spinQuery = query(spinsRef, orderBy("timestamp", "desc"));
+  const snap = await getDocs(spinQuery);
+
+  const allSpins = [];
   snap.forEach(docSnap => {
-    const data = docSnap.data();
-    spinEntries.push({ id: docSnap.id, ...data });
+    allSpins.push({ id: docSnap.id, ...docSnap.data() });
   });
 
-  // Sort by timestamp (if exists), else use document ID as fallback
-  spinEntries.sort((a, b) => {
-    const at = a.timestamp ? a.timestamp.toMillis?.() || a.timestamp : 0;
-    const bt = b.timestamp ? b.timestamp.toMillis?.() || b.timestamp : 0;
-    return bt - at;
-  });
-
-  // Auto delete extra old entries beyond 5
-  if (spinEntries.length > 5) {
-    const extras = spinEntries.slice(5); // Entries to delete
-    for (const entry of extras) {
-      await deleteDoc(doc(db, "spins", entry.id));
-    }
+  // 🔥 Delete ALL spin entries before loading anything
+  for (const spin of allSpins) {
+    await deleteDoc(doc(db, "spins", spin.id));
   }
 
-  // Show only remaining (latest 5) results
-  const visibleSpins = spinEntries.slice(0, 5);
-  visibleSpins.forEach(d => {
-    if (!d.name || !d.result) return;
-
-    const rakhi = parseInt(d.rakhiCount || 0);
-    const amount = parseInt(d.amount || 0);
-    totalRakhis += rakhi;
-    totalAmount += amount;
-
-    const card = document.createElement("div");
-    card.className = "card mb-3 p-3 shadow-sm";
-    card.innerHTML = `
-      <h5><i class="bi bi-person-fill"></i> ${d.name}</h5>
-      <p><i class="bi bi-arrow-repeat"></i> Result: ${d.result}</p>
-      <p><i class="bi bi-basket"></i> Rakhis: <b>${rakhi}</b> | ₹<b>${amount}</b></p>
-    `;
-    list.appendChild(card);
-  });
+  // ⛔ Optional message shown on clearing
+  list.innerHTML = `<div class="text-center text-muted">🧹 All spin entries cleared. Start fresh!</div>`;
 }
 
-// ✅ Load Guess Game
+// ✅ Load Guessing Game Results
 async function loadGuessGame() {
   const list = document.getElementById("guessResults");
   if (!list) return;
 
   list.innerHTML = '';
   const snap = await getDocs(collection(db, "guessGame"));
-
   snap.forEach(docSnap => {
     const d = docSnap.data();
-    if (!d.name) return;
-
-    const status = d.success ? "✔️ Correct" : "❌ Failed";
-
     const card = document.createElement("div");
     card.className = "card mb-3 p-3 shadow-sm";
     card.innerHTML = `
-      <h5><i class="bi bi-controller"></i> ${d.name}</h5>
-      <p><i class="bi bi-check-circle"></i> ${status}</p>
+      <h5><i class="bi bi-person-fill"></i> ${d.name}</h5>
+      <p><i class="bi bi-controller"></i> Attempts: ${d.attempts}</p>
+      <p><i class="bi bi-award"></i> Guessed: ${d.success ? "✅ Yes" : "❌ No"}</p>
     `;
     list.appendChild(card);
   });
 }
 
-// ✅ Load Ring Toss
+// ✅ Load Tap Game Results
 async function loadRingToss() {
-  const list = document.getElementById("ringResults");
+  const list = document.getElementById("tapResults");
   if (!list) return;
 
   list.innerHTML = '';
-  const snap = await getDocs(collection(db, "ringTossGame"));
-
+  const snap = await getDocs(collection(db, "tapGame"));
   snap.forEach(docSnap => {
     const d = docSnap.data();
-    if (!d.name) return;
-
     const card = document.createElement("div");
     card.className = "card mb-3 p-3 shadow-sm";
     card.innerHTML = `
-      <h5><i class="bi bi-person-badge"></i> ${d.name}</h5>
+      <h5><i class="bi bi-person-fill"></i> ${d.name}</h5>
       <p><i class="bi bi-trophy"></i> Score: ${d.score}</p>
     `;
     list.appendChild(card);
   });
 }
 
-// ✅ Update UI Totals
+// ✅ Update Total Rakhis and ₹
 function updateTotalStatsUI() {
-  const r = document.getElementById("totalRakhis");
-  const m = document.getElementById("totalMoney");
-  if (r) r.innerText = totalRakhis;
-  if (m) m.innerText = totalAmount;
+  document.getElementById("totalRakhis").innerText = totalRakhis;
+  document.getElementById("totalAmount").innerText = totalAmount;
 }
 
 // ✅ Main Admin Init
@@ -185,10 +124,11 @@ async function initAdmin() {
   totalRakhis = 0;
   totalAmount = 0;
   await loadFeedbacks();
-  await loadSpinResults();
+  await loadSpinResults(); // 🔥 delete old on page load
   await loadGuessGame();
   await loadRingToss();
   updateTotalStatsUI();
 }
 
+// ✅ Call it
 initAdmin();
